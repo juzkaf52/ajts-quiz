@@ -1027,7 +1027,6 @@ async function deleteClass(id){
 }
 
 // ══ USERS ══
-let currentUserTab='student';
 function setUserTab(role,btn){
   currentUserTab=role;
   document.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
@@ -1408,8 +1407,6 @@ loadAll = async function() {
 // ══ OVERRIDE saveTest() to include new options ══
 const _origSaveTest = saveTest;
 saveTest = async function() {
-  // patch options into test before saving
-  const origFn = window._patchedSave;
   const title=document.getElementById('c-title').value.trim();
   if(!title){toast('Enter test title','warn');return;}
   const qs=collectQuestions();
