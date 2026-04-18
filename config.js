@@ -1,5 +1,5 @@
 // config.js — Shared across all pages
-const API_URL = 'https://script.google.com/macros/s/AKfycbxXR9nKM9smeBBHS4hwSuTXkEXjtuVJHguVJ6iBqtI9uwS2RblyVO8OvyDrffDvMJTiuA/exec'; // Replace with your deployed URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbyjQteF1Z5je8hNJJAtzCPofE14drp0sO4ql6Y0MiBOY0Lc0diIaCLVIwGzKOHZW5im/exec'; // Replace with your deployed URL
 
 async function api(action, payload = {}) {
   const res = await fetch(API_URL, {
