@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Portal — AJTS Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:'KanzAlMarjan';src:url('KANZ-AL-MARJAAN.TTF') format('truetype')}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#050b1a;--deep:#080f22;--mid:#0d1633;--surface:#111d3d;--card:#142040;--elevated:#1a2850;
+  --gold:#d4a017;--gold2:#f0c040;--gold-soft:#e8b84b;
+  --gold-dim:rgba(212,160,23,.15);--gold-glow:rgba(212,160,23,.35);--gold-border:rgba(212,160,23,.25);
+  --emerald:#0f7a55;--emerald2:#10a06e;--emerald3:#12c484;--emerald-dim:rgba(15,122,85,.25);
+  --ruby:#8b1a2e;--text:#f0e8d4;--muted:#7a6e60;--sub:#b8a890;--border:rgba(212,160,23,.12);
+}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--navy)}::-webkit-scrollbar-thumb{background:var(--gold-dim);border-radius:3px}
+body{font-family:'Tajawal',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(212,160,23,.06),transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(15,122,85,.05),transparent 50%)}
+body::before{content:'';position:fixed;inset:0;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30z' fill='none' stroke='%23d4a017' stroke-width='0.5'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+
+/* TOPBAR */
+.topbar{background:rgba(8,15,34,.9);border-bottom:1px solid var(--gold-border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;backdrop-filter:blur(20px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.top-logo{font-family:'KanzAlMarjan','Amiri',serif;color:var(--gold2);font-size:1.25rem;text-shadow:0 0 16px var(--gold-glow)}
+.top-user{display:flex;align-items:center;gap:10px}
+.top-avatar{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;color:var(--navy);box-shadow:0 4px 12px var(--gold-glow)}
+.top-name{font-size:.88rem;font-weight:700}
+.top-class{font-size:.72rem;color:var(--gold-soft)}
+
+/* TIMER */
+.timer-bar{background:rgba(8,15,34,.8);padding:10px 28px;display:flex;align-items:center;justify-content:center;gap:14px;border-bottom:1px solid var(--gold-border)}
+.timer-display{font-family:'Amiri',serif;font-size:1.7rem;color:var(--gold2);font-weight:700;min-width:82px;text-align:center;text-shadow:0 0 16px var(--gold-glow)}
+.timer-label{font-size:.8rem;color:var(--muted)}
+.timer-bar.urgent .timer-display{color:#f87171;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.content{max-width:780px;margin:0 auto;padding:28px 20px;position:relative;z-index:1}
+.screen{display:none}.screen.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* WELCOME */
+.welcome-card{background:linear-gradient(160deg,var(--surface),var(--card));border:1px solid var(--gold-border);border-radius:20px;padding:40px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.4);position:relative;overflow:hidden}
+.welcome-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,var(--gold-dim),transparent)}
+.welcome-ornament{font-size:3rem;margin-bottom:16px}
+.welcome-title{font-family:'KanzAlMarjan','Amiri',serif;font-size:2.2rem;color:var(--gold2);margin-bottom:8px;text-shadow:0 0 20px var(--gold-glow)}
+.welcome-sub{color:var(--muted);font-size:.9rem;margin-bottom:32px}
+
+/* TEST CARDS */
+.test-card{background:linear-gradient(135deg,var(--card),var(--elevated));border:1px solid var(--gold-border);border-radius:14px;padding:18px 20px;margin-bottom:12px;cursor:pointer;transition:all .2s;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.test-card:hover{border-color:var(--gold-soft);background:linear-gradient(135deg,rgba(212,160,23,.1),rgba(212,160,23,.05));transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.4)}
+.test-card.selected{border-color:var(--gold2);background:linear-gradient(135deg,rgba(212,160,23,.15),rgba(212,160,23,.08));box-shadow:0 0 0 2px rgba(212,160,23,.3),0 8px 28px rgba(0,0,0,.3)}
+.tc-title{font-weight:700;font-size:1rem;color:var(--text);margin-bottom:4px}
+.tc-meta{font-size:.78rem;color:var(--muted)}
+.tc-arrow{color:var(--gold2);font-size:1.3rem;flex-shrink:0}
+
+.btn-start{width:100%;padding:15px;margin-top:18px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:var(--navy);font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .22s;box-shadow:0 6px 24px var(--gold-glow)}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 10px 32px var(--gold-glow)}
+.btn-start:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* TEST HEADER */
+.test-header{background:linear-gradient(135deg,var(--surface),var(--card));border:1px solid var(--gold-border);border-radius:16px;padding:20px 24px;margin-bottom:18px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.test-header h1{font-family:'Amiri',serif;font-size:1.5rem;color:var(--gold2);margin-bottom:6px;text-shadow:0 0 14px var(--gold-glow)}
+.test-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.test-instructions{margin-top:12px;font-size:.88rem;background:var(--gold-dim);padding:10px 14px;border-radius:10px;border-left:3px solid var(--gold);line-height:1.6;color:var(--text)}
+
+/* PROGRESS */
+.q-progress{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.q-progress-bar{flex:1;height:7px;background:rgba(255,255,255,.07);border-radius:20px;overflow:hidden;border:1px solid var(--gold-border)}
+.q-progress-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--emerald),var(--gold));transition:width .5s}
+.q-progress-text{font-size:.78rem;color:var(--gold-soft);flex-shrink:0;font-weight:700}
+
+/* QUESTION CARDS */
+.q-card{background:linear-gradient(135deg,var(--card),var(--elevated));border:1px solid var(--gold-border);border-radius:16px;padding:24px;margin-bottom:14px;animation:fadeUp .3s ease both;box-shadow:0 4px 16px rgba(0,0,0,.25)}
+.q-card-num{font-size:.7rem;color:var(--gold-soft);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.q-card-text{font-size:1.05rem;font-weight:600;line-height:1.7;margin-bottom:18px;color:var(--text)}
+
+/* MCQ */
+.mcq-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--gold-border);border-radius:10px;margin-bottom:9px;cursor:pointer;transition:all .18s;background:rgba(5,11,26,.4)}
+.mcq-opt:hover{border-color:var(--gold-soft);background:var(--gold-dim);transform:translateX(3px)}
+.mcq-opt.selected{border-color:var(--gold2);background:rgba(212,160,23,.12);box-shadow:0 0 0 2px rgba(212,160,23,.2)}
+.mcq-opt-letter{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:var(--muted);flex-shrink:0;transition:all .18s}
+.mcq-opt.selected .mcq-opt-letter{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border-color:var(--gold)}
+.mcq-opt-text{font-size:.92rem;color:var(--text)}
+
+/* T/F */
+.tf-group{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tf-btn{padding:16px;border:1.5px solid var(--gold-border);border-radius:12px;background:rgba(5,11,26,.4);color:var(--text);font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}
+.tf-btn:hover{border-color:var(--gold-soft);background:var(--gold-dim)}
+.tf-true.selected-t{border-color:var(--emerald3);background:var(--emerald-dim);color:var(--emerald3);box-shadow:0 0 0 2px rgba(18,196,132,.2)}
+.tf-false.selected-f{border-color:#f87171;background:rgba(248,113,113,.1);color:#f87171;box-shadow:0 0 0 2px rgba(248,113,113,.15)}
+
+/* FILL */
+.fill-sentence{font-size:1rem;line-height:3}
+.blank-input{display:inline-block;background:rgba(212,160,23,.1);border:2px solid var(--gold);border-radius:8px;color:var(--gold2);font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;outline:none;min-width:110px;text-align:center;padding:4px 12px;margin:0 5px;vertical-align:middle;transition:all .2s}
+.blank-input:focus{border-color:var(--gold2);background:rgba(212,160,23,.18);box-shadow:0 0 0 3px rgba(212,160,23,.15)}
+
+/* SHORT */
+.short-input{width:100%;padding:12px 14px;background:rgba(5,11,26,.5);border:1.5px solid var(--gold-border);border-radius:10px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:.95rem;outline:none;transition:border .2s;resize:vertical;min-height:80px}
+.short-input:focus{border-color:var(--gold-soft);background:rgba(212,160,23,.06)}
+
+/* MATCH */
+.match-container{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.match-col{display:flex;flex-direction:column;gap:8px}
+.match-col h4{font-size:.72rem;color:var(--gold-soft);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:800}
+.match-item{padding:10px 14px;border:1.5px solid var(--gold-border);border-radius:10px;font-size:.88rem;cursor:pointer;transition:all .15s;background:rgba(5,11,26,.4)}
+.match-item:hover{border-color:var(--gold-soft);background:var(--gold-dim)}
+.match-item.selected-left{border-color:var(--gold2);background:rgba(212,160,23,.18)}
+.match-item.matched{border-color:var(--emerald3);background:var(--emerald-dim);color:var(--emerald3)}
+.match-result{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.match-pair-result{display:flex;align-items:center;gap:8px;font-size:.83rem;padding:6px 10px;background:rgba(255,255,255,.04);border-radius:8px;border:1px solid var(--gold-border)}
+
+/* ORDER */
+.order-list{list-style:none}
+.order-item{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1.5px solid var(--gold-border);border-radius:10px;margin-bottom:8px;cursor:grab;background:rgba(5,11,26,.4);transition:all .15s;user-select:none}
+.order-item:hover{border-color:var(--gold-soft);background:var(--gold-dim)}
+.order-item.dragging{opacity:.5;border-color:var(--gold2);cursor:grabbing}
+.drag-handle{color:var(--gold-soft);font-size:1rem;flex-shrink:0}
+.order-num{width:26px;height:26px;border-radius:7px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:800;color:var(--gold-soft);flex-shrink:0}
+
+/* IMAGE/AUDIO */
+.q-image{width:100%;max-height:260px;object-fit:contain;border-radius:10px;margin-bottom:16px;border:1px solid var(--gold-border)}
+.q-audio{width:100%;margin-bottom:16px;border-radius:10px}
+
+/* SUBMIT */
+.submit-section{margin-top:22px;padding:20px;background:linear-gradient(135deg,var(--surface),var(--card));border-radius:16px;border:1px solid var(--gold-border);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.answered-count{font-size:.85rem;color:var(--muted);margin-bottom:12px}
+.btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,var(--emerald),var(--emerald2));border:none;border-radius:12px;color:#fff;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;transition:all .22s;box-shadow:0 6px 24px var(--emerald-dim)}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(15,122,85,.5)}
+
+/* RESULT */
+.result-hero{background:linear-gradient(160deg,var(--surface),var(--card));border:1px solid var(--gold-border);border-radius:20px;padding:40px;text-align:center;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.result-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,var(--gold-dim),transparent)}
+.big-score{font-family:'Amiri',serif;font-size:5rem;font-weight:700;line-height:1;text-shadow:0 0 40px currentColor}
+.result-msg{font-size:1.05rem;color:var(--sub);margin-top:12px}
+.result-details{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.rd-box{background:rgba(5,11,26,.5);border-radius:12px;padding:14px;border:1px solid var(--gold-border)}
+.rd-num{font-family:'Amiri',serif;font-size:1.7rem;color:var(--gold2);font-weight:700;text-shadow:0 0 12px var(--gold-glow)}
+.rd-label{font-size:.73rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.8px}
+.btn-retry{padding:12px 28px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:10px;font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px var(--gold-glow)}
+.btn-retry:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--gold-glow)}
+
+/* QUOTE */
+.quote-box{background:linear-gradient(135deg,rgba(212,160,23,.1),rgba(212,160,23,.05));border:1px solid var(--gold-border);border-radius:14px;padding:22px;margin-top:16px;text-align:center}
+.quote-text{font-family:'KanzAlMarjan','Amiri',serif;font-size:1.15rem;color:var(--gold2);line-height:1.8;text-shadow:0 0 12px var(--gold-glow)}
+.quote-attr{font-size:.75rem;color:var(--muted);margin-top:7px}
+
+/* REVIEW */
+.review-wrap{max-width:780px;margin:0 auto;padding:0 20px 40px}
+.rq-card{background:linear-gradient(135deg,var(--card),var(--elevated));border:1px solid var(--gold-border);border-radius:14px;padding:20px;margin-bottom:14px;animation:fadeUp .3s ease both}
+.rq-correct{border-left:4px solid var(--emerald3)!important}
+.rq-wrong{border-left:4px solid #f87171!important}
+.rq-pending{border-left:4px solid var(--gold2)!important}
+.rq-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:10px}
+.lc-ok{color:var(--emerald3)}.lc-err{color:#f87171}.lc-rev{color:var(--gold-soft)}
+.opt-review{display:flex;align-items:center;gap:10px;padding:9px 13px;border-radius:8px;margin-bottom:7px;border:1.5px solid transparent;font-size:.9rem}
+.opt-correct{border-color:var(--emerald3);background:var(--emerald-dim);color:var(--emerald3)}
+.opt-wrong{border-color:#f87171;background:rgba(248,113,113,.1);color:#f87171}
+.opt-normal{border-color:var(--gold-border);color:var(--muted)}
+
+/* LOGOUT BTN */
+.sb-logout-btn{background:none;border:1px solid rgba(212,160,23,.2);color:var(--muted);padding:6px 13px;border-radius:8px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:.8rem;margin-left:8px;transition:all .2s}
+.sb-logout-btn:hover{border-color:var(--gold-border);color:var(--gold-soft)}
+
+@media(max-width:500px){.match-container{grid-template-columns:1fr}.result-details{grid-template-columns:1fr 1fr}.tf-group{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="top-logo">الجامعة السيفية</div>
+  <div class="top-user">
+    <div class="top-avatar" id="s-avatar">S</div>
+    <div>
+      <div class="top-name" id="s-name">Student</div>
+      <div class="top-class" id="s-class">—</div>
+    </div>
+    <button onclick="logout()" class="sb-logout-btn">Sign Out</button>
+  </div>
+</div>
+
+<div id="timer-wrap" style="display:none">
+  <div class="timer-bar" id="timer-bar">
+    <span class="timer-label">⏱ Time Remaining</span>
+    <span class="timer-display" id="timer-display">00:00</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- WELCOME / TEST SELECT -->
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome-card">
+      <div class="welcome-ornament">🎓</div>
+      <div class="welcome-title" id="wc-title">Assalaamu Alaikum!</div>
+      <div class="welcome-sub" id="wc-sub">Your assigned tests are shown below. Select one to begin.</div>
+      <div id="test-list"><div style="color:var(--muted);padding:30px">Loading your tests…</div></div>
+      <button class="btn-start" id="start-btn" onclick="startSelected()" disabled>▶ Start Test</button>
+    </div>
+  </div>
+
+  <!-- ACTIVE TEST -->
+  <div class="screen" id="screen-test">
+    <div class="test-header">
+      <h1 id="th-title">Test Title</h1>
+      <div class="test-meta">
+        <span id="th-subject"></span>
+        <span id="th-class"></span>
+        <span id="th-qcount"></span>
+      </div>
+      <div id="th-instructions"></div>
+    </div>
+    <div class="q-progress">
+      <div class="q-progress-bar"><div class="q-progress-fill" id="q-prog-fill" style="width:0%"></div></div>
+      <div class="q-progress-text" id="q-prog-text">0 / 0</div>
+    </div>
+    <div id="questions-area"></div>
+    <div class="submit-section">
+      <div class="answered-count" id="ans-count"></div>
+      <button class="btn-submit" onclick="submitTest()">✅ Submit Test</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-hero">
+      <div class="big-score" id="res-score"></div>
+      <div class="result-msg" id="res-msg"></div>
+      <div class="result-details">
+        <div class="rd-box"><div class="rd-num" id="rd-correct">0</div><div class="rd-label">Correct</div></div>
+        <div class="rd-box"><div class="rd-num" id="rd-total">0</div><div class="rd-label">Total</div></div>
+        <div class="rd-box"><div class="rd-num" id="rd-manual">0</div><div class="rd-label">Manual Review</div></div>
+      </div>
+      <div id="res-quote" class="quote-box"></div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+        <button class="btn-retry" onclick="goHome()">← Back to Tests</button>
+        <button id="res-review-btn" class="btn-retry" style="display:none;background:var(--green2)">👁️ Review Answers</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  <!-- REVIEW SCREEN -->
+  <div class="screen" id="screen-review">
+    <div class="review-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:'Amiri',serif;font-size:1.4rem;color:var(--gold)" id="rv-title">Test Review</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:2px" id="rv-meta"></div>
+        </div>
+        <button class="btn-retry" onclick="goHome()" style="margin:0">← Back to Tests</button>
+      </div>
+      <div id="rv-questions"></div>
+    </div>
+  </div>
+
+<script src="config.js"></script>
+<script>
+let user, myTests = [], currentTest = null, answers = {}, timerInterval = null;
+// Match state
+let matchSelectedLeft = null, matchPairs = {};
+// Order state
+let orderState = {};
+
+window.onload = async () => {
+  user = requireAuth('student');
+  if (!user) return;
+  document.getElementById('s-name').textContent = user.name || user.username;
+  document.getElementById('s-avatar').textContent = (user.name||user.username)[0].toUpperCase();
+  document.getElementById('s-class').textContent = user.class || '—';
+  document.getElementById('wc-title').textContent = `Assalaamu Alaikum, ${user.name || user.username}!`;
+  document.getElementById('wc-sub').textContent = `Class: ${user.class || '—'} · Choose a test below to begin.`;
+  await loadTests();
+};
+
+async function loadTests() {
+  const res = await api('getTests', { class: user.class, active: true });
+  myTests = res.tests || [];
+  const list = document.getElementById('test-list');
+  if (!myTests.length) { list.innerHTML = '<div style="color:var(--muted);padding:30px">No tests assigned to your class yet.</div>'; return; }
+  list.innerHTML = myTests.map((t,i) => `
+    <div class="test-card" id="tc-${i}" onclick="selectTest(${i})">
+      <div>
+        <div class="tc-title">${t.title}</div>
+        <div class="tc-meta">${t.subject} · ${t.questions.length} questions${t.timeLimit ? ` · ⏱ ${t.timeLimit} min` : ''}</div>
+      </div>
+      <div class="tc-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+let selectedIdx = null;
+function selectTest(i) {
+  selectedIdx = i;
+  document.querySelectorAll('.test-card').forEach((el,j) => el.classList.toggle('selected', j===i));
+  document.getElementById('start-btn').disabled = false;
+}
+
+async function startSelected() {
+  if (selectedIdx === null) return;
+  const test = myTests[selectedIdx];
+  // Check one attempt
+  if (test.oneAttempt) {
+    const already = await checkAttempt(test.id);
+    if (already) {
+      toast('You have already taken this test. One attempt only.', 'warn');
+      return;
+    }
+  }
+  currentTest = test;
+  answers = {}; matchPairs = {}; orderState = {};
+  renderTest();
+}
+
+function renderTest() {
+  const t = currentTest;
+  document.getElementById('th-title').textContent = t.title;
+  document.getElementById('th-subject').textContent = '📚 ' + t.subject;
+  document.getElementById('th-class').textContent = '🏫 ' + t.class;
+  document.getElementById('th-qcount').textContent = `❓ ${t.questions.length} questions`;
+  const inst = document.getElementById('th-instructions');
+  inst.innerHTML = t.instructions ? `<div class="test-instructions">${t.instructions}</div>` : '';
+  updateProgress();
+
+  const area = document.getElementById('questions-area');
+  // Apply shuffle if enabled
+  let questions = [...t.questions];
+  if (t.shuffle) {
+    for (let i = questions.length-1; i > 0; i--) {
+      const j = Math.floor(Math.random()*(i+1));
+      [questions[i], questions[j]] = [questions[j], questions[i]];
+    }
+  }
+  if (t.shuffleOptions) {
+    questions = questions.map(q => {
+      if ((q.type==='mcq'||q.type==='image'||q.type==='audio') && q.options) {
+        const opts = [...q.options];
+        const correctOpt = opts[q.correct];
+        for (let i=opts.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[opts[i],opts[j]]=[opts[j],opts[i]];}
+        return {...q, options:opts, correct:opts.indexOf(correctOpt)};
+      }
+      return q;
+    });
+  }
+  // Store shuffled questions order for review
+  t._displayQuestions = questions;
+  area.innerHTML = questions.map((q,qi) => renderQuestion(q, qi)).join('');
+
+  // Init order drag
+  t.questions.forEach((q,qi) => {
+    if (q.type === 'order') initOrder(qi, q.items);
+  });
+
+  showScreen('screen-test');
+
+  if (t.timeLimit) {
+    let secs = t.timeLimit * 60;
+    document.getElementById('timer-wrap').style.display = '';
+    updateTimerDisplay(secs);
+    timerInterval = setInterval(() => {
+      secs--;
+      updateTimerDisplay(secs);
+      if (secs <= 60) document.getElementById('timer-bar').classList.add('urgent');
+      if (secs <= 0) { clearInterval(timerInterval); submitTest(); }
+    }, 1000);
+  }
+}
+
+function updateTimerDisplay(secs) {
+  const m = Math.floor(secs/60), s = secs%60;
+  document.getElementById('timer-display').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function renderQuestion(q, qi) {
+  const letters = ['A','B','C','D','E','F'];
+  let body = '';
+  const typeLabels = {mcq:'Multiple Choice',fill:'Fill in the Blank',tf:'True / False',short:'Short Answer',match:'Match the Columns',order:'Order the Sequence',image:'Image Question',audio:'Audio Question'};
+
+  if (q.type === 'mcq') {
+    body = q.options.map((o,i) => `<div class="mcq-opt" id="mopt-${qi}-${i}" onclick="selectMCQ(${qi},${i})"><div class="mcq-opt-letter">${letters[i]}</div><div class="mcq-opt-text">${o}</div></div>`).join('');
+  }
+
+  if (q.type === 'tf') {
+    body = `<div class="tf-group">
+      <button class="tf-btn tf-true" id="tf-${qi}-true" onclick="selectTF(${qi},'true')">✔ True</button>
+      <button class="tf-btn tf-false" id="tf-${qi}-false" onclick="selectTF(${qi},'false')">✘ False</button>
+    </div>`;
+  }
+
+  if (q.type === 'fill') {
+    const arabicFont = currentTest?.arabicFont || 'Amiri';
+    // Support both ___ and ــــ (Arabic underscore) as blank markers
+    const text = q.text || '';
+    // Detect if Arabic (RTL)
+    const isArabic = /[\u0600-\u06FF]/.test(text);
+    const dir = isArabic ? 'rtl' : 'ltr';
+    const fontStyle = isArabic ? 'font-family:Amiri,serif;font-size:1.2rem;' : '';
+    const parts = text.split('___');
+    if (parts.length === 1) {
+      // No blanks found — show text + one input below
+      body = `<div class="fill-sentence" dir="${dir}" style="${fontStyle}">${text}</div>
+        <input type="text" class="blank-input" style="display:block;width:100%;margin-top:14px;text-align:${isArabic?'right':'left'}" 
+          oninput="setFill(${qi},0,this.value)" placeholder="${isArabic ? 'اكتب إجابتك هنا…' : 'Type your answer here…'}">`;
+    } else {
+      body = `<div class="fill-sentence" dir="${dir}" style="${fontStyle}line-height:2.8;">` +
+        parts.map((p,i) => i < parts.length-1
+          ? `${p}<input type="text" class="blank-input" oninput="setFill(${qi},${i},this.value)" placeholder="…">`
+          : p).join('') + `</div>`;
+    }
+    return buildQCard(qi, '', typeLabels[q.type], body);
+  }
+
+  if (q.type === 'short') {
+    body = `<textarea class="short-input" placeholder="Write your answer here…" oninput="answers['${qi}']=this.value;updateAnswerCount()"></textarea>`;
+  }
+
+  if (q.type === 'match') {
+    const lefts = q.pairs.map(p=>p.left);
+    const rights = [...q.pairs.map(p=>p.right)].sort(() => Math.random()-.5);
+    body = `<div class="match-container">
+      <div class="match-col"><h4>Column A</h4>${lefts.map((l,i)=>`<div class="match-item" id="ml-${qi}-${i}" onclick="selectLeft(${qi},${i},'${l.replace(/'/g,"\\'")}','${lefts.join('|')}')">${l}</div>`).join('')}</div>
+      <div class="match-col"><h4>Column B</h4>${rights.map((r,i)=>`<div class="match-item" id="mr-${qi}-${i}" onclick="selectRight(${qi},${i},'${r.replace(/'/g,"\\'")}',${JSON.stringify(lefts)},${JSON.stringify(rights)})">${r}</div>`).join('')}</div>
+    </div>
+    <div class="match-result" id="matchres-${qi}"></div>`;
+  }
+
+  if (q.type === 'order') {
+    body = `<ul class="order-list" id="orderlist-${qi}"></ul><div style="font-size:.78rem;color:var(--muted);margin-top:6px">💡 Drag items into the correct order</div>`;
+  }
+
+  if (q.type === 'image') {
+    body = `${q.imageUrl ? `<img src="${q.imageUrl}" class="q-image" alt="Question image">` : ''}` +
+      q.options.map((o,i)=>`<div class="mcq-opt" id="mopt-${qi}-${i}" onclick="selectMCQ(${qi},${i})"><div class="mcq-opt-letter">${letters[i]}</div><div class="mcq-opt-text">${o}</div></div>`).join('');
+  }
+
+  if (q.type === 'audio') {
+    body = `${q.audioUrl ? `<audio controls class="q-audio"><source src="${q.audioUrl}"></audio>` : '<div style="color:var(--muted);margin-bottom:12px">🎵 Audio file not set</div>'}` +
+      q.options.map((o,i)=>`<div class="mcq-opt" id="mopt-${qi}-${i}" onclick="selectMCQ(${qi},${i})"><div class="mcq-opt-letter">${letters[i]}</div><div class="mcq-opt-text">${o}</div></div>`).join('');
+  }
+
+  return buildQCard(qi, q.text, typeLabels[q.type], body);
+}
+
+function buildQCard(qi, text, typeLabel, body) {
+  const isArabic = text && /[\u0600-\u06FF]/.test(text);
+  const dir = isArabic ? 'rtl' : 'ltr';
+  const fontStyle = isArabic ? 'font-family:Amiri,serif;font-size:1.15rem;' : '';
+  return `<div class="q-card">
+    <div class="q-card-num">QUESTION ${qi+1} · ${typeLabel}</div>
+    ${text ? `<div class="q-card-text" dir="${dir}" style="${fontStyle}">${text}</div>` : ''}
+    ${body}
+  </div>`;
+}
+
+// ── MCQ ──
+function selectMCQ(qi, oi) {
+  const q = currentTest.questions[qi];
+  const count = (q.type==='image'||q.type==='audio') ? q.options.length : q.options.length;
+  for (let i=0; i<count; i++) document.getElementById(`mopt-${qi}-${i}`)?.classList.remove('selected');
+  document.getElementById(`mopt-${qi}-${oi}`)?.classList.add('selected');
+  answers[qi] = oi; updateAnswerCount(); updateProgress();
+}
+
+// ── T/F ──
+function selectTF(qi, val) {
+  document.getElementById(`tf-${qi}-true`).classList.remove('selected-t');
+  document.getElementById(`tf-${qi}-false`).classList.remove('selected-f');
+  if (val==='true') document.getElementById(`tf-${qi}-true`).classList.add('selected-t');
+  else document.getElementById(`tf-${qi}-false`).classList.add('selected-f');
+  answers[qi] = val; updateAnswerCount(); updateProgress();
+}
+
+// ── FILL ──
+function setFill(qi, blankIdx, val) {
+  if (typeof answers[qi] !== 'object' || answers[qi]===null) answers[qi] = {};
+  answers[qi][blankIdx] = val;
+  updateAnswerCount(); updateProgress();
+}
+
+// ── MATCH ──
+function selectLeft(qi, idx, val) {
+  document.querySelectorAll(`[id^="ml-${qi}-"]`).forEach(el => el.classList.remove('selected-left'));
+  document.getElementById(`ml-${qi}-${idx}`).classList.add('selected-left');
+  matchSelectedLeft = { qi, idx, val };
+}
+
+function selectRight(qi, idx, val, lefts, rights) {
+  if (!matchSelectedLeft || matchSelectedLeft.qi !== qi) { toast('Select a left item first','warn'); return; }
+  if (!answers[qi] || typeof answers[qi] !== 'object') answers[qi] = {};
+  answers[qi][matchSelectedLeft.val] = val;
+  document.getElementById(`ml-${qi}-${matchSelectedLeft.idx}`)?.classList.remove('selected-left');
+  document.getElementById(`ml-${qi}-${matchSelectedLeft.idx}`)?.classList.add('matched');
+  document.getElementById(`mr-${qi}-${idx}`)?.classList.add('matched');
+  matchSelectedLeft = null;
+  // Render pairs
+  const res = document.getElementById(`matchres-${qi}`);
+  if (res) res.innerHTML = Object.entries(answers[qi]).map(([l,r]) => `<div class="match-pair-result"><span>${l}</span><span style="color:var(--gold)">→</span><span>${r}</span></div>`).join('');
+  updateAnswerCount(); updateProgress();
+}
+
+// ── ORDER ──
+function initOrder(qi, items) {
+  const shuffled = [...items].sort(() => Math.random()-.5);
+  orderState[qi] = shuffled;
+  renderOrderList(qi);
+}
+
+function renderOrderList(qi) {
+  const ul = document.getElementById(`orderlist-${qi}`);
+  if (!ul) return;
+  ul.innerHTML = orderState[qi].map((item,i) => `
+    <li class="order-item" draggable="true" data-qi="${qi}" data-i="${i}"
+      ondragstart="dragStart(event,${qi},${i})"
+      ondragover="event.preventDefault()"
+      ondrop="dragDrop(event,${qi},${i})">
+      <span class="drag-handle">⠿</span>
+      <span class="order-num">${i+1}</span>
+      <span>${item}</span>
+    </li>
+  `).join('');
+  answers[qi] = [...orderState[qi]];
+}
+
+let dragFrom = null;
+function dragStart(e, qi, i) { dragFrom = { qi, i }; }
+function dragDrop(e, qi, i) {
+  if (!dragFrom || dragFrom.qi !== qi) return;
+  const arr = orderState[qi];
+  const [item] = arr.splice(dragFrom.i, 1);
+  arr.splice(i, 0, item);
+  renderOrderList(qi);
+  updateAnswerCount(); updateProgress();
+}
+
+// ── PROGRESS ──
+function updateProgress() {
+  const total = currentTest.questions.length;
+  const answered = Object.keys(answers).filter(k => {
+    const v = answers[k];
+    if (v === undefined || v === null || v === '') return false;
+    if (typeof v === 'object' && Object.keys(v).length === 0) return false;
+    return true;
+  }).length;
+  const pct = total ? (answered/total*100) : 0;
+  document.getElementById('q-prog-fill').style.width = pct + '%';
+  document.getElementById('q-prog-text').textContent = `${answered} / ${total}`;
+}
+
+function updateAnswerCount() {
+  const total = currentTest.questions.length;
+  const answered = Object.keys(answers).length;
+  document.getElementById('ans-count').textContent = `${answered} of ${total} questions answered`;
+}
+
+// ── SUBMIT ──
+async function submitTest() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  document.getElementById('timer-wrap').style.display = 'none';
+  const t = currentTest;
+  let score = 0, total = 0, manualCount = 0;
+  const answerDetails = [];
+
+  t.questions.forEach((q, qi) => {
+    const sa = answers[qi];
+    let isCorrect = null;
+    let studentStr = '';
+    let correctStr = '';
+
+    if (q.type === 'mcq' || q.type === 'image' || q.type === 'audio') {
+      total++;
+      isCorrect = sa === q.correct;
+      if (isCorrect) score++;
+      studentStr = sa !== undefined ? q.options[sa] : '(no answer)';
+      correctStr = q.options[q.correct];
+    }
+    if (q.type === 'tf') {
+      total++;
+      isCorrect = String(sa) === String(q.correct);
+      if (isCorrect) score++;
+      studentStr = sa || '(no answer)';
+      correctStr = q.correct;
+    }
+    if (q.type === 'fill') {
+      total++;
+      const vals = typeof sa === 'object' ? Object.values(sa||{}) : [];
+      studentStr = vals.join(', ') || '(blank)';
+      const expected = q.answers || [];
+      isCorrect = expected.length > 0 && vals.every((v,i) => v.toLowerCase().trim() === (expected[i]||'').toLowerCase().trim());
+      if (isCorrect) score++;
+      correctStr = (q.answers||[]).join(', ');
+    }
+    if (q.type === 'short') {
+      total++;
+      studentStr = sa || '(no answer)';
+      correctStr = q.model || '';
+      isCorrect = null; manualCount++;
+    }
+    if (q.type === 'match') {
+      total++;
+      const userPairs = sa || {};
+      isCorrect = q.pairs.every(p => userPairs[p.left] === p.right);
+      if (isCorrect) score++;
+      studentStr = Object.entries(userPairs).map(([l,r])=>`${l}→${r}`).join(', ') || '(none)';
+      correctStr = q.pairs.map(p=>`${p.left}→${p.right}`).join(', ');
+    }
+    if (q.type === 'order') {
+      total++;
+      const userOrder = sa || [];
+      isCorrect = JSON.stringify(userOrder) === JSON.stringify(q.items);
+      if (isCorrect) score++;
+      studentStr = (userOrder).join(' → ');
+      correctStr = (q.items||[]).join(' → ');
+    }
+
+    answerDetails.push({ text: q.text, type: q.type, student: studentStr, correct: correctStr, isCorrect, qIdx: qi });
+  });
+
+  const pct = total > 0 ? Math.round(score/total*100) : 0;
+  const status = manualCount > 0 ? 'pending_review' : 'complete';
+  const result = { studentId: user.id, studentName: user.name||user.username, studentEmail: user.email||'', testId: t.id, testTitle: t.title, subject: t.subject, class: user.class, score, total, pct, answers: answerDetails, status };
+
+  await api('submitResult', { result });
+
+  // Show result screen
+  document.getElementById('res-score').textContent = pct + '%';
+  document.getElementById('res-score').style.color = pct>=70?'#4ade80':pct>=40?'#fcd34d':'#f87171';
+  const msgs = { high:['Excellent work! 🌟','Outstanding! 🎉','Brilliant! ✨'], mid:['Good effort! 💪','Keep it up! 👍','Nice try! 📚'], low:['Keep practicing! 📖','Review and try again! 🔄','Don\'t give up! 💡'] };
+  const bucket = pct>=70?'high':pct>=40?'mid':'low';
+  document.getElementById('res-msg').textContent = msgs[bucket][Math.floor(Math.random()*3)];
+  document.getElementById('rd-correct').textContent = score;
+  document.getElementById('rd-total').textContent = total;
+  document.getElementById('rd-manual').textContent = manualCount;
+  showScreen('screen-result');
+}
+
+function goHome() {
+  answers = {}; matchPairs = {}; orderState = {}; currentTest = null; selectedIdx = null;
+  document.getElementById('timer-wrap').style.display = 'none';
+  showScreen('screen-welcome');
+  loadTests();
+}
+
+// ══ MOTIVATIONAL QUOTES ══
+const QUOTES = [
+  { text: 'طلب العلم فريضة على كل مسلم', attr: 'Prophet Muhammad ﷺ' },
+  { text: 'العلم نور والجهل ظلام', attr: 'Arabic Proverb' },
+  { text: 'من جدّ وجد، ومن زرع حصد', attr: 'Arabic Proverb' },
+  { text: 'Knowledge is the life of the mind.', attr: 'Abu Bakr Al-Siddiq RA' },
+  { text: 'اقرأ باسم ربك الذي خلق', attr: 'Quran 96:1' },
+  { text: 'Seek knowledge from the cradle to the grave.', attr: 'Prophetic Tradition' },
+  { text: 'The ink of the scholar is holier than the blood of the martyr.', attr: 'Prophetic Tradition' },
+  { text: 'Every expert was once a beginner. Keep going! 🌟', attr: '' },
+  { text: 'تعلّم، فإن العلم زين لأهله', attr: 'Arabic Proverb' },
+];
+function getQuote(pct) {
+  if (pct >= 80) return QUOTES[Math.floor(Math.random()*3)];
+  if (pct >= 50) return QUOTES[3+Math.floor(Math.random()*3)];
+  return QUOTES[6+Math.floor(Math.random()*3)];
+}
+
+// ══ TEST REVIEW MODE ══
+function showReviewMode(test, submittedAnswers, resultAnswers) {
+  document.getElementById('rv-title').textContent = test.title + ' — Review';
+  document.getElementById('rv-meta').textContent = test.subject + ' · ' + test.class;
+  const arabicFont = test.arabicFont || 'Amiri';
+
+  const area = document.getElementById('rv-questions');
+  area.innerHTML = resultAnswers.map((a, qi) => {
+    const q = test.questions[qi] || {};
+    const isCorrect = a.isCorrect;
+    const cardCls = isCorrect===true?'rq-correct':isCorrect===false?'rq-wrong':'rq-pending';
+    const labelCls = isCorrect===true?'lc-ok':isCorrect===false?'lc-err':'lc-rev';
+    const labelTxt = isCorrect===true?'✔ Correct':isCorrect===false?'✘ Incorrect':'⏳ Manual Review';
+    const isArabic = /[؀-ۿ]/.test(q.text||'');
+    const dir = isArabic ? 'rtl' : 'ltr';
+    const fontStyle = `font-family:'${arabicFont}',serif`;
+
+    let body = '';
+
+    if (q.type==='mcq'||q.type==='image'||q.type==='audio') {
+      if (q.type==='image'&&q.imageUrl) body += `<img src="${q.imageUrl}" style="max-height:200px;border-radius:8px;margin-bottom:12px;width:100%;object-fit:contain">`;
+      if (q.type==='audio'&&q.audioUrl) body += `<audio controls style="width:100%;margin-bottom:12px"><source src="${q.audioUrl}"></audio>`;
+      body += (q.options||[]).map((opt,i)=>{
+        const isStudentChoice = a.student === opt;
+        const isCorrectOpt = i === q.correct;
+        const cls = isCorrectOpt?'opt-correct':isStudentChoice&&!isCorrectOpt?'opt-wrong':'opt-normal';
+        const icon = isCorrectOpt?'✔':isStudentChoice&&!isCorrectOpt?'✘':'';
+        return `<div class="opt-review ${cls}">${icon?`<strong>${icon}</strong>`:''} ${opt}</div>`;
+      }).join('');
+    }
+    if (q.type==='tf') {
+      body = `<div class="opt-review ${a.student===String(q.correct)?'opt-correct':'opt-wrong'}">Your answer: <strong>${a.student}</strong></div>
+        <div class="opt-review opt-correct">Correct: <strong>${q.correct}</strong></div>`;
+    }
+    if (q.type==='fill') {
+      body = `<div style="font-size:.88rem;color:var(--muted);margin-bottom:6px">Your answer: <span style="color:${isCorrect?'#4ade80':'#f87171'}">${a.student}</span></div>
+        <div style="font-size:.88rem;color:#4ade80">Correct: ${(q.answers||[]).join(', ')}</div>`;
+    }
+    if (q.type==='short') {
+      body = `<div style="font-size:.88rem;padding:10px;background:rgba(255,255,255,.04);border-radius:6px;margin-bottom:8px">${a.student||'(no answer)'}</div>
+        ${q.model?`<div style="font-size:.8rem;color:var(--gold)">Model answer: ${q.model}</div>`:''}`;
+    }
+    if (q.type==='match') {
+      body = `<div style="font-size:.82rem;color:var(--muted)">Your matches: <span style="color:${isCorrect?'#4ade80':'#f87171'}">${a.student}</span></div>
+        <div style="font-size:.82rem;color:#4ade80;margin-top:4px">Correct: ${(q.pairs||[]).map(p=>p.left+'→'+p.right).join(', ')}</div>`;
+    }
+    if (q.type==='order') {
+      body = `<div style="font-size:.82rem;color:var(--muted)">Your order: <span style="color:${isCorrect?'#4ade80':'#f87171'}">${a.student}</span></div>
+        <div style="font-size:.82rem;color:#4ade80;margin-top:4px">Correct: ${(q.items||[]).join(' → ')}</div>`;
+    }
+
+    return `<div class="rq-card ${cardCls}">
+      <div class="rq-label ${labelCls}">${labelTxt}</div>
+      <div style="font-size:1rem;font-weight:600;margin-bottom:12px;line-height:1.6" dir="${dir}" style="${fontStyle}">Q${qi+1}. ${q.text||''}</div>
+      ${body}
+    </div>`;
+  }).join('');
+
+  showScreen('screen-review');
+}
+
+// ══ ONE ATTEMPT CHECK ══
+async function checkAttempt(testId) {
+  const u = getUser();
+  if (!u) return false;
+  const res = await api('checkAttempt', {studentId: u.id, testId});
+  return res.attempted || false;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
